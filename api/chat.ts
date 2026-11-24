@@ -1,5 +1,9 @@
 
-import { puter } from '../src/puterClient.js';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -13,17 +17,21 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const result = await puter.ai.chat(message);
+    const response = await openai.responses.create({
+      model: 'gpt-5.5',
+      instructions: 'You are MyAI, a helpful assistant. Reply in English, Urdu or Roman Urdu according to the user. Be friendly and accurate.',
+      input: message
+    });
 
-    const reply =
-      typeof result === 'string'
-        ? result
-        : result?.message?.content ?? JSON.stringify(result);
+    return res.status(200).json({
+      reply: response.output_text
+    });
 
-    return res.status(200).json({ reply });
   } catch (error) {
+    console.error('OpenAI API error:', error);
+
     return res.status(500).json({
-      error: 'AI request failed'
+      error: 'AI request failed. Please try again.'
     });
   }
 }
