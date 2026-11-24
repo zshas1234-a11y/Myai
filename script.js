@@ -4,13 +4,6 @@ const prompt = document.getElementById("prompt");
 const send = document.getElementById("send");
 const newChat = document.getElementById("newChat");
 
-const systemMessage = {
-  role: "system",
-  content: "You are MyAI, a helpful assistant. Understand and reply in English, Urdu and Roman Urdu. Be friendly and accurate."
-};
-
-let messages = [systemMessage];
-
 function addMessage(text, type) {
   const div = document.createElement("div");
   div.className = "message " + type;
@@ -29,35 +22,30 @@ async function sendMessage() {
   if (welcome) welcome.remove();
 
   prompt.value = "";
-
   addMessage(question, "user");
-
-  messages.push({
-    role: "user",
-    content: question
-  });
 
   send.disabled = true;
   const loading = addMessage("MyAI is thinking...", "bot");
 
   try {
-    const response = await puter.ai.chat(messages);
-
-    const answer = response.message.content;
-    const finalAnswer = typeof answer === "string"
-      ? answer
-      : JSON.stringify(answer);
-
-    loading.textContent = finalAnswer;
-
-    messages.push({
-      role: "assistant",
-      content: finalAnswer
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: question })
     });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Something went wrong");
+    }
+
+    loading.textContent = data.reply || "No response received.";
 
   } catch (error) {
     loading.textContent = "Error: " + error.message;
-    messages.pop();
   } finally {
     send.disabled = false;
     prompt.focus();
@@ -74,7 +62,6 @@ prompt.addEventListener("keydown", function(event) {
 });
 
 newChat.addEventListener("click", function() {
-  messages = [systemMessage];
   chat.innerHTML = `
     <div class="welcome">
       <h1>Welcome to MyAI</h1>
@@ -82,4 +69,3 @@ newChat.addEventListener("click", function() {
     </div>
   `;
 });
-
