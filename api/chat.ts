@@ -1,25 +1,35 @@
 
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({
+      error: 'Method not allowed'
+    });
   }
 
   try {
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: 'OPENAI_API_KEY is missing in Vercel'
+      });
+    }
+
+    const openai = new OpenAI({ apiKey });
+
     const { message } = req.body || {};
 
     if (!message || typeof message !== 'string') {
-      return res.status(400).json({ error: 'Message is required' });
+      return res.status(400).json({
+        error: 'Message is required'
+      });
     }
 
     const response = await openai.responses.create({
       model: 'gpt-5.5',
-      instructions: 'You are MyAI, a helpful assistant. Reply in English, Urdu or Roman Urdu according to the user. Be friendly and accurate.',
+      instructions: 'You are MyAI, a helpful assistant. Reply in English, Urdu or Roman Urdu according to the user.',
       input: message
     });
 
@@ -28,10 +38,10 @@ export default async function handler(req: any, res: any) {
     });
 
   } catch (error) {
-    console.error('OpenAI API error:', error);
+    console.error('MyAI error:', error);
 
     return res.status(500).json({
-      error: 'AI request failed. Please try again.'
+      error: 'OpenAI request failed. Check Vercel function logs.'
     });
   }
 }
