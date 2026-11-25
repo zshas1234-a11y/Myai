@@ -1,71 +1,83 @@
-
 const chat = document.getElementById("chat");
-const prompt = document.getElementById("prompt");
-const send = document.getElementById("send");
-const newChat = document.getElementById("newChat");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("send");
+const clearBtn = document.getElementById("clearBtn");
+const empty = document.getElementById("empty");
+
+let history = [];
 
 function addMessage(text, type) {
+  if (empty) empty.style.display = "none";
   const div = document.createElement("div");
-  div.className = "message " + type;
+  div.className = "msg " + type;
   div.textContent = text;
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
   return div;
 }
 
-async function sendMessage() {
-  const question = prompt.value.trim();
+function addTyping() {
+  const div = addMessage("", "bot");
+  div.classList.add("typing");
+  div.innerHTML = "<span></span><span></span><span></span>";
+  return div;
+}
 
-  if (!question || send.disabled) return;
-
-  const welcome = chat.querySelector(".welcome");
-  if (welcome) welcome.remove();
-
-  prompt.value = "";
-  addMessage(question, "user");
-
-  send.disabled = true;
-  const loading = addMessage("MyAI is thinking...", "bot");
+async function sendMessage(text) {
+  history.push({ role: "user", content: text });
+  addMessage(text, "user");
+  const typing = addTyping();
+  sendBtn.disabled = true;
 
   try {
-    const response = await fetch("/api/chat", {
+    const res = await fetch("/api/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message: question })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: history }),
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Something went wrong");
-    }
-
-    loading.textContent = data.reply || "No response received.";
-
-  } catch (error) {
-    loading.textContent = "Error: " + error.message;
+    const data = await res.json();
+    typing.remove();
+    if (!res.ok) throw new Error(data.error || "Server error");
+    history.push({ role: "assistant", content: data.reply });
+    addMessage(data.reply, "bot");
+  } catch (err) {
+    typing.remove();
+    history.pop();
+    addMessage("Jawab nahi aa saka: " + err.message + ". Dobara koshish karein.", "error");
   } finally {
-    send.disabled = false;
-    prompt.focus();
+    sendBtn.disabled = false;
+    input.focus();
   }
 }
 
-send.addEventListener("click", sendMessage);
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = input.value.trim();
+  if (!text || sendBtn.disabled) return;
+  input.value = "";
+  input.style.height = "auto";
+  sendMessage(text);
+});
 
-prompt.addEventListener("keydown", function(event) {
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault();
-    sendMessage();
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    form.requestSubmit();
   }
 });
 
-newChat.addEventListener("click", function() {
-  chat.innerHTML = `
-    <div class="welcome">
-      <h1>Welcome to MyAI</h1>
-      <p>What can I help you with today?</p>
-    </div>
-  `;
+input.addEventListener("input", () => {
+  input.style.height = "auto";
+  input.style.height = Math.min(input.scrollHeight, 140) + "px";
+});
+
+document.querySelectorAll(".chip").forEach((chip) => {
+  chip.addEventListener("click", () => sendMessage(chip.textContent));
+});
+
+clearBtn.addEventListener("click", () => {
+  history = [];
+  chat.querySelectorAll(".msg").forEach((m) => m.remove());
+  empty.style.display = "";
 });
