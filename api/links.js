@@ -77,9 +77,9 @@ module.exports = async (req, res) => {
       { key: "api_model", value: aModel },
     ];
     // API key sirf tab update hoti hai jab admin nayi key likhe
-    const aKey = String(b.api_key || "").trim();
+    const aKey = String(b.api_key || "").trim().replace(/^Bearer\s+/i, "");
     if (aKey) {
-      if (aKey.length > 300 || /\s/.test(aKey)) {
+      if (aKey.length > 4000 || /\s/.test(aKey)) {
         return res.status(400).json({ error: "API key galat lag rahi hai" });
       }
       rowsOut.push({ key: "api_key", value: aKey });
