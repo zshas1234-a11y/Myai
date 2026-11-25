@@ -220,3 +220,8 @@ textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline
   max-height: none;
 }
 .hint { margin: 0 0 16px; font-size: 14px; color: var(--muted); }
+
+.modes { display: flex; gap: 22px; flex-wrap: wrap; }
+.card .modes label { display: flex; align-items: center; gap: 8px; font-weight: 400; margin: 0; cursor: pointer; }
+.card .modes input { width: auto; margin: 0; }
+#saveBtn { margin-top: 4px; }
