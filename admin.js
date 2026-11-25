@@ -32,6 +32,16 @@ function collect() {
     .filter((l) => l.label && l.url);
 }
 
+function getMode() {
+  return document.querySelector('input[name="mode"]:checked').value;
+}
+function showMode() {
+  const api = getMode() === "api";
+  $("apiBox").hidden = !api;
+  $("scriptBox").hidden = api;
+}
+document.querySelectorAll('input[name="mode"]').forEach((r) => r.addEventListener("change", showMode));
+
 async function login() {
   password = $("pw").value;
   $("loginStatus").textContent = "Check ho raha hai...";
@@ -44,6 +54,12 @@ async function login() {
     });
     if (!res.ok) throw new Error();
     const cur = await (await fetch("/api/links")).json();
+    document.querySelector('input[name="mode"][value="' + (cur.mode === "api" ? "api" : "script") + '"]').checked = true;
+    $("aUrl").value = cur.api_url || "https://api.openai.com/v1/chat/completions";
+    $("aModel").value = cur.api_model || "gpt-4o-mini";
+    $("aKey").value = "";
+    $("aKey").placeholder = cur.api_set ? "Key save hai (badalne ke liye nayi likhein)" : "sk-...";
+    showMode();
     $("sUrl").value = cur.script_url || DEFAULT_URL;
     $("sCode").value = cur.script_code || DEFAULT_CODE;
     $("rows").innerHTML = "";
@@ -76,11 +92,24 @@ async function save() {
     const res = await fetch("/api/links", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password, links, script_url, script_code }),
+      body: JSON.stringify({
+        password,
+        links,
+        script_url,
+        script_code,
+        mode: getMode(),
+        api_url: $("aUrl").value.trim(),
+        api_model: $("aModel").value.trim(),
+        api_key: $("aKey").value.trim(),
+      }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Error");
-    $("saveStatus").textContent = "Save ho gaya. Website par naya script aur links lag gaye.";
+    if ($("aKey").value.trim()) {
+      $("aKey").value = "";
+      $("aKey").placeholder = "Key save hai (badalne ke liye nayi likhein)";
+    }
+    $("saveStatus").textContent = "Save ho gaya. Website par naya system lag gaya.";
     $("saveStatus").className = "status ok";
   } catch (e) {
     $("saveStatus").textContent = "Save nahi hua: " + e.message;
