@@ -56,6 +56,20 @@ async function setup() {
     if (Array.isArray(cfg.links) && cfg.links.length) renderLinks(cfg.links);
   } catch (e) {}
 
+  if (cfg.mode === "api") {
+    askAI = async (messages) => {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Server error");
+      return data.reply;
+    };
+    return;
+  }
+
   const url = cfg.script_url || DEFAULT_URL;
   const code = cfg.script_code || DEFAULT_CODE;
   try {
@@ -110,7 +124,7 @@ async function sendMessage(text) {
   } catch (err) {
     typing.remove();
     history.pop();
-    addMessage("Jawab nahi aa saka: " + (err.message || "error") + ". Admin panel mein script check karein.", "error");
+    addMessage("Jawab nahi aa saka: " + (err.message || "error") + ". Admin panel mein settings check karein.", "error");
   } finally {
     sendBtn.disabled = false;
     input.focus();
