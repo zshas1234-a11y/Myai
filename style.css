@@ -159,3 +159,51 @@ textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline
 }
 #send:disabled { opacity: .5; cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) { .typing span { animation: none; } }
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  justify-content: center;
+  padding: 0 0 16px;
+  font: 600 14px "Bricolage Grotesque", system-ui, sans-serif;
+}
+.links a { color: var(--muted); text-decoration: none; }
+.links a:hover { color: var(--accent); text-decoration: underline; }
+
+/* admin page */
+.admin { max-width: 560px; margin: 0 auto; padding: 24px 16px 60px; }
+.admin h1 { margin-bottom: 18px; }
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.card label { display: block; font-weight: 600; margin-bottom: 6px; }
+.card input {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; margin-bottom: 8px; }
+.row input { margin: 0; }
+.btn {
+  font: 600 15px "Bricolage Grotesque", system-ui, sans-serif;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.btn.light { color: var(--ink); background: transparent; border: 1px solid var(--line); }
+.status { margin: 10px 0 0; font-size: 15px; min-height: 1.4em; }
+.status.ok { color: #1c7c3a; }
+.status.bad { color: #b3261e; }
