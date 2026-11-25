@@ -1,6 +1,15 @@
 const $ = (id) => document.getElementById(id);
 let password = "";
 
+const DEFAULT_URL = "https://js.puter.com/v2/";
+const DEFAULT_CODE = `// Model chahiye to: puter.ai.chat(messages, { model: "gpt-6-luna" })
+const r = await puter.ai.chat(messages);
+if (typeof r === "string") return r;
+const c = r && r.message && r.message.content;
+if (typeof c === "string") return c;
+if (Array.isArray(c)) return c.map((p) => p.text || "").join("");
+return String(r);`;
+
 function addRow(label = "", url = "") {
   const row = document.createElement("div");
   row.className = "row";
@@ -35,6 +44,8 @@ async function login() {
     });
     if (!res.ok) throw new Error();
     const cur = await (await fetch("/api/links")).json();
+    $("sUrl").value = cur.script_url || DEFAULT_URL;
+    $("sCode").value = cur.script_code || DEFAULT_CODE;
     $("rows").innerHTML = "";
     (cur.links && cur.links.length ? cur.links : [{}]).forEach((l) => addRow(l.label, l.url));
     $("loginBox").hidden = true;
@@ -53,17 +64,23 @@ async function save() {
     $("saveStatus").className = "status bad";
     return;
   }
+  let script_url = $("sUrl").value.trim();
+  let script_code = $("sCode").value.trim();
+  if (script_url === DEFAULT_URL && script_code === DEFAULT_CODE) {
+    script_url = "";
+    script_code = "";
+  }
   $("saveStatus").textContent = "Save ho raha hai...";
   $("saveStatus").className = "status";
   try {
     const res = await fetch("/api/links", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password, links }),
+      body: JSON.stringify({ password, links, script_url, script_code }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Error");
-    $("saveStatus").textContent = "Save ho gaya. Website par links badal gaye.";
+    $("saveStatus").textContent = "Save ho gaya. Website par naya script aur links lag gaye.";
     $("saveStatus").className = "status ok";
   } catch (e) {
     $("saveStatus").textContent = "Save nahi hua: " + e.message;
