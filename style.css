@@ -207,3 +207,16 @@ textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline
 .status { margin: 10px 0 0; font-size: 15px; min-height: 1.4em; }
 .status.ok { color: #1c7c3a; }
 .status.bad { color: #b3261e; }
+
+.card textarea {
+  width: 100%;
+  font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  max-height: none;
+}
+.hint { margin: 0 0 16px; font-size: 14px; color: var(--muted); }
