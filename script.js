@@ -1,6 +1,3 @@
-// Agar Puter ka koi khaas model chahiye to yahan naam likhein, warna khali rehne dein.
-const MODEL = "";
-
 const chat = document.getElementById("chat");
 const form = document.getElementById("form");
 const input = document.getElementById("input");
@@ -9,14 +6,24 @@ const clearBtn = document.getElementById("clearBtn");
 const empty = document.getElementById("empty");
 const linksBox = document.getElementById("links");
 
-let history = [];
+/* Default AI script (admin se badla ja sakta hai) */
+const DEFAULT_URL = "https://js.puter.com/v2/";
+const DEFAULT_CODE = `const r = await puter.ai.chat(messages);
+if (typeof r === "string") return r;
+const c = r && r.message && r.message.content;
+if (typeof c === "string") return c;
+if (Array.isArray(c)) return c.map((p) => p.text || "").join("");
+return String(r);`;
 
-/* ---------- Website links (admin se edit hote hain) ---------- */
 const DEFAULT_LINKS = [
   { label: "Twitter", url: "https://twitter.com" },
   { label: "Instagram", url: "https://instagram.com" },
   { label: "YouTube", url: "https://youtube.com" },
 ];
+
+let history = [];
+let askAI = null;
+let setupError = "";
 
 function renderLinks(list) {
   linksBox.innerHTML = "";
@@ -31,14 +38,35 @@ function renderLinks(list) {
   });
 }
 
-async function loadLinks() {
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("AI script load nahi hui"));
+    document.head.appendChild(s);
+  });
+}
+
+async function setup() {
+  let cfg = {};
   renderLinks(DEFAULT_LINKS);
   try {
-    const res = await fetch("/api/links");
-    const data = await res.json();
-    if (Array.isArray(data.links) && data.links.length) renderLinks(data.links);
+    cfg = await (await fetch("/api/links")).json();
+    if (Array.isArray(cfg.links) && cfg.links.length) renderLinks(cfg.links);
   } catch (e) {}
+
+  const url = cfg.script_url || DEFAULT_URL;
+  const code = cfg.script_code || DEFAULT_CODE;
+  try {
+    await loadScript(url);
+    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+    askAI = new AsyncFunction("messages", code);
+  } catch (e) {
+    setupError = e.message || "AI setup nahi hua";
+  }
 }
+const ready = setup();
 
 /* ---------- Chat ---------- */
 function addMessage(text, type) {
@@ -58,14 +86,6 @@ function addTyping() {
   return div;
 }
 
-function extractReply(r) {
-  if (typeof r === "string") return r;
-  const c = r && r.message && r.message.content;
-  if (typeof c === "string") return c;
-  if (Array.isArray(c)) return c.map((p) => p.text || "").join("");
-  return String(r);
-}
-
 async function sendMessage(text) {
   history.push({ role: "user", content: text });
   addMessage(text, "user");
@@ -73,6 +93,8 @@ async function sendMessage(text) {
   sendBtn.disabled = true;
 
   try {
+    await ready;
+    if (!askAI) throw new Error(setupError || "AI taiyar nahi hai");
     const messages = [
       {
         role: "system",
@@ -81,15 +103,14 @@ async function sendMessage(text) {
       },
       ...history.slice(-20),
     ];
-    const opts = MODEL ? { model: MODEL } : {};
-    const reply = extractReply(await puter.ai.chat(messages, opts));
+    const reply = String(await askAI(messages));
     typing.remove();
     history.push({ role: "assistant", content: reply });
     addMessage(reply, "bot");
   } catch (err) {
     typing.remove();
     history.pop();
-    addMessage("Jawab nahi aa saka. Dobara koshish karein.", "error");
+    addMessage("Jawab nahi aa saka: " + (err.message || "error") + ". Admin panel mein script check karein.", "error");
   } finally {
     sendBtn.disabled = false;
     input.focus();
@@ -126,5 +147,3 @@ clearBtn.addEventListener("click", () => {
   chat.querySelectorAll(".msg").forEach((m) => m.remove());
   empty.style.display = "";
 });
-
-loadLinks();
