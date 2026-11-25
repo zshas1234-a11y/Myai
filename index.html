@@ -2,42 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MyAI - Your AI Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&family=Source+Serif+4:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script src="https://js.puter.com/v2/"></script>
 </head>
 <body>
-
-<div class="app">
-  <aside class="sidebar">
-    <h2>🤖 MyAI</h2>
-    <button id="newChat">+ New Chat</button>
-    <div class="side-info">Your personal AI assistant</div>
-  </aside>
-
-  <main class="main">
-    <header>
-      <h3>MyAI Assistant</h3>
-      <span class="status">● Online</span>
+  <main class="app">
+    <header class="top">
+      <h1>Poochho<span class="dot"></span></h1>
+      <button id="clearBtn" class="ghost" type="button">New chat</button>
     </header>
 
-    <section id="chat">
-      <div class="welcome">
-        <h1>Welcome to MyAI</h1>
-        <p>What can I help you with today?</p>
+    <section id="chat" class="chat" aria-live="polite">
+      <div class="empty" id="empty">
+        <p class="lead">Kuch bhi poochho. Jawab yahan milega.</p>
+        <div class="chips">
+          <button class="chip" type="button">Mujhe aaj ka study plan banao</button>
+          <button class="chip" type="button">Ek email likhne mein madad karo</button>
+          <button class="chip" type="button">AI kya hota hai? Aasan alfaaz mein</button>
+        </div>
       </div>
     </section>
 
-    <div class="input-area">
-      <textarea id="prompt" rows="1"
-        placeholder="Message MyAI..."></textarea>
-      <button id="send">➤</button>
-    </div>
-    <p class="footer">MyAI can make mistakes. Verify important information.</p>
+    <form id="form" class="composer">
+      <textarea id="input" rows="1" placeholder="Apna sawal likhein..." aria-label="Message"></textarea>
+      <button id="send" type="submit">Bhejein</button>
+    </form>
   </main>
-</div>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
