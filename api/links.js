@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
 
   if (req.method === "GET") {
     try {
-      const keys = "links,script_url,script_code,mode,api_url,api_model,api_key";
+      const keys = "links,script_url,script_code,mode,api_url,api_model,api_key,embeds";
       const r = await fetch(url + "?key=in.(" + keys + ")&select=key,value", { headers });
       const rows = await r.json();
       const m = {};
@@ -21,6 +21,7 @@ module.exports = async (req, res) => {
       res.setHeader("Cache-Control", "no-store");
       return res.status(200).json({
         links: Array.isArray(m.links) ? m.links : [],
+        embeds: Array.isArray(m.embeds) ? m.embeds : [],
         script_url: str(m.script_url),
         script_code: str(m.script_code),
         mode: m.mode === "api" ? "api" : "script",
@@ -68,7 +69,30 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: "Model ka naam galat hai" });
     }
 
+    const embeds = [];
+    const inEmbeds = Array.isArray(b.embeds) ? b.embeds : [];
+    if (inEmbeds.length > 10) return res.status(400).json({ error: "Zyada se zyada 10 websites" });
+    const n = (v, d, lo, hi) => { v = parseFloat(v); if (isNaN(v)) v = d; return Math.min(hi, Math.max(lo, v)); };
+    for (const e of inEmbeds) {
+      const eu = String(e.url || "").trim();
+      if (!/^https:\/\/[^\s"'<>]{1,500}$/.test(eu)) {
+        return res.status(400).json({ error: "Website ka link https:// se shuru hona chahiye" });
+      }
+      embeds.push({
+        title: String(e.title || "").trim().slice(0, 40),
+        url: eu,
+        mode: ["inline", "popup", "tab"].includes(e.mode) ? e.mode : "inline",
+        width: n(e.width, 100, 10, 5000),
+        unit: e.unit === "px" ? "px" : "%",
+        height: n(e.height, 400, 50, 3000),
+        ox: n(e.ox, 0, 0, 20000),
+        oy: n(e.oy, 0, 0, 20000),
+        zoom: n(e.zoom, 100, 10, 300),
+      });
+    }
+
     const rowsOut = [
+      { key: "embeds", value: embeds },
       { key: "links", value: clean },
       { key: "script_url", value: sUrl },
       { key: "script_code", value: sCode },
