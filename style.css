@@ -225,3 +225,23 @@ textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline
 .card .modes label { display: flex; align-items: center; gap: 8px; font-weight: 400; margin: 0; cursor: pointer; }
 .card .modes input { width: auto; margin: 0; }
 #saveBtn { margin-top: 4px; }
+
+/* embeds */
+.embeds { max-width: 760px; margin: 0 auto; padding: 8px 16px 48px; display: flex; flex-direction: column; gap: 24px; }
+.embeds:empty { display: none; }
+.embed-title { margin: 0 0 8px; font: 600 20px "Bricolage Grotesque", system-ui, sans-serif; }
+.embed-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.embed-buttons .btn { text-decoration: none; display: inline-block; }
+.frame-wrap { position: relative; overflow: hidden; max-width: 100%; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); }
+.modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,.6); }
+.modal-box { position: relative; max-width: 96vw; max-height: 94vh; overflow: auto; padding: 14px; border-radius: var(--radius); background: var(--panel); }
+.modal-close { margin-bottom: 10px; }
+
+/* admin embed editor */
+.embed-item { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+.embed-item .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.card .embed-item label { font-weight: 400; font-size: 14px; margin: 0; }
+.embed-item select { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 8px; }
+.embed-item .pair { display: grid; grid-template-columns: 2fr 1fr; gap: 6px; }
+.embed-item .pair input { margin: 0; }
+.e-prev { margin-top: 10px; overflow: auto; }
