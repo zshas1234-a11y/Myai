@@ -54,6 +54,7 @@ async function setup() {
   try {
     cfg = await (await fetch("/api/links")).json();
     if (Array.isArray(cfg.links) && cfg.links.length) renderLinks(cfg.links);
+    if (Array.isArray(cfg.embeds)) renderEmbeds(cfg.embeds, document.getElementById("embeds"));
   } catch (e) {}
 
   if (cfg.mode === "api") {
